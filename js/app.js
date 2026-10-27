@@ -105,19 +105,27 @@ function mostrarModalCamara(stream) {
     modal.id = "modalCamara";
     modal.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
+      background: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column;
       align-items: center; justify-content: center; z-index: 1000; padding: 1rem;
+      box-sizing: border-box;
     `;
     document.body.appendChild(modal);
   }
 
   modal.innerHTML = `
-    <div style="position: relative; max-width: 500px; width: 100%; text-align: center;">
-      <video id="videoCamara" autoplay playsinline style="width: 100%; max-height: 60vh; border-radius: 8px; background: #000;"></video>
-      <div style="margin-top: 1rem; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-        <button type="button" id="btnCapturarFotograma" class="btn btn-primary">Capturar Foto</button>
-        <button type="button" id="btnCambiarCamara" class="btn btn-outline" style="color: #fff; border-color: #fff;">🔄 Cambiar Cámara</button>
-        <button type="button" id="btnCancelarCamara" class="btn btn-outline" style="color: #fff; border-color: #fff;">Cancelar</button>
+    <div style="position: relative; max-width: 480px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+      <video id="videoCamara" autoplay playsinline style="width: 100%; max-height: 55vh; border-radius: 12px; background: #000; object-fit: cover;"></video>
+      
+      <div style="width: 100%; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+        <button type="button" id="btnCapturarFotograma" class="btn btn-primary" style="flex: 1 1 100%; padding: 0.75rem;">
+          📷 Capturar Foto
+        </button>
+        <button type="button" id="btnCambiarCamara" class="btn btn-outline" style="flex: 1; color: #fff; border-color: #fff; padding: 0.5rem; font-size: 0.9rem;">
+          🔄 Cambiar
+        </button>
+        <button type="button" id="btnCancelarCamara" class="btn btn-outline" style="flex: 1; color: #fff; border-color: #fff; padding: 0.5rem; font-size: 0.9rem;">
+          Cancelar
+        </button>
       </div>
     </div>
   `;
@@ -125,7 +133,7 @@ function mostrarModalCamara(stream) {
   const video = modal.querySelector("#videoCamara");
   video.srcObject = stream;
 
-  // Botón para capturar imagen
+  // Evento: Capturar Fotograma
   modal.querySelector("#btnCapturarFotograma").addEventListener("click", () => {
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth || 640;
@@ -137,29 +145,27 @@ function mostrarModalCamara(stream) {
     fotoActual = canvas.toDataURL("image/jpeg");
 
     const preview = $("#previewFoto");
-    preview.src = fotoActual;
-    preview.hidden = false;
+    if (preview) {
+      preview.src = fotoActual;
+      preview.hidden = false;
+    }
     $("#estadoFoto").textContent = "Fotografía: capturada ✓";
 
     cerrarModalCamara();
   });
 
-  // Botón para alternar la cámara (Trasera <-> Frontal)
+  // Evento: Cambiar Cámara (Trasera <-> Frontal)
   modal.querySelector("#btnCambiarCamara").addEventListener("click", async () => {
-    // Detener el stream actual antes de cambiar
     if (streamCamara) {
       streamCamara.getTracks().forEach((track) => track.stop());
       streamCamara = null;
     }
 
-    // Alternar entre modo "environment" y "user"
     facingModeActual = (facingModeActual === "environment") ? "user" : "environment";
-
-    // Reabrir la cámara con el nuevo modo
     await tomarFoto();
   });
 
-  // Botón para cancelar la captura
+  // Evento: Cancelar
   modal.querySelector("#btnCancelarCamara").addEventListener("click", cerrarModalCamara);
 }
 
