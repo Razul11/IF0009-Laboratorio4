@@ -1,219 +1,194 @@
-
 <!doctype html>
 <html lang="es">
 
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-        <meta name="theme-color" content="#176b83">
-        <meta name="description"
-            content="Laboratorio PWA de registro de visitas">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#176b83">
+    <meta name="description" content="Laboratorio PWA de registro de visitas">
 
-        <link rel="manifest" href="./manifest.json">
-        <link rel="icon" href="./icons/icon-192.png">
-        <link rel="stylesheet" href="./css/style.css">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./icons/icon-192.png">
+    <link rel="stylesheet" href="./css/style.css">
 
-        <title>Registro de visitas | PWA</title>
-    </head>
+    <title>Registro de visitas | PWA</title>
+</head>
 
-    <body>
+<body>
 
-        <!-- ENCABEZADO -->
-        <header class="header">
-            <div class="container header-inner">
+    <!-- ENCABEZADO -->
+    <header class="header">
+        <div class="container header-inner">
 
-                <div class="brand">
-                    <span class="brand-icon">⌖</span>
+            <div class="brand">
+                <span class="brand-icon">⌖</span>
+
+                <div>
+                    <strong>Registro de visitas</strong>
+                    <small>Laboratorio de PWA</small>
+                </div>
+            </div>
+
+            <span class="pill" id="estadoConexion">
+                Comprobando red
+            </span>
+
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- INTRODUCCIÓN -->
+        <section class="intro">
+            <span class="eyebrow">LABORATORIO PRÁCTICO</span>
+
+            <h1>Documenta cada visita desde tu celular.</h1>
+
+            <p>
+                Captura una fotografía, registra la ubicación y conserva
+                la información en tu dispositivo, incluso sin conexión.
+            </p>
+        </section>
+
+        <div class="layout">
+
+            <!-- SECCIÓN 1: NUEVA VISITA -->
+            <section class="panel">
+
+                <div class="panel-heading">
+                    <span class="step">01</span>
 
                     <div>
-                        <strong>Registro de visitas</strong>
-                        <small>Laboratorio de PWA</small>
+                        <h2>Nueva visita</h2>
+                        <p>Completa los datos y guarda el registro.</p>
                     </div>
                 </div>
 
-                <span class="pill" id="estadoConexion">
-                    Comprobando red
-                </span>
+                <form id="formVisita">
 
-            </div>
-        </header>
+                    <!-- DESCRIPCIÓN -->
+                    <label for="descripcion">
+                        Descripción de la visita
+                    </label>
 
-        <main class="container">
+                    <textarea id="descripcion" maxlength="300" required
+                        placeholder="Ej. Revisión de instalaciones y equipo..."></textarea>
 
-            <!-- INTRODUCCIÓN -->
-            <section class="intro">
-                <span class="eyebrow">LABORATORIO PRÁCTICO</span>
+                    <div class="capture-grid">
 
-                <h1>Documenta cada visita desde tu celular.</h1>
+                        <!-- FOTOGRAFÍA -->
+                        <div class="capture">
+                            <div class="capture-symbol">📷</div>
 
-                <p>
-                    Captura una fotografía, registra la ubicación y conserva
-                    la información en tu dispositivo, incluso sin conexión.
-                </p>
-            </section>
+                            <h3>Fotografía</h3>
+                            <p>Captura una imagen desde tu dispositivo.</p>
 
-            <div class="layout">
+                            <button class="btn btn-outline" type="button" id="btnFoto">
+                                Tomar fotografía
+                            </button>
 
-                <!-- SECCIÓN 1: NUEVA VISITA -->
-                <section class="panel">
+                            <input type="file" id="inputFoto" accept="image/*" capture="environment" hidden>
 
-                    <div class="panel-heading">
-                        <span class="step">01</span>
-
-                        <div>
-                            <h2>Nueva visita</h2>
-                            <p>Completa los datos y guarda el registro.</p>
+                            <img id="previewFoto" alt="Vista previa de fotografía" hidden>
                         </div>
+
+                        <!-- UBICACIÓN -->
+                        <div class="capture">
+                            <div class="capture-symbol">📍</div>
+
+                            <h3>Ubicación</h3>
+                            <p>Obtén tus coordenadas actuales.</p>
+
+                            <button class="btn btn-outline" type="button" id="btnUbicacion">
+                                Obtener ubicación
+                            </button>
+
+                            <a id="enlaceMapa" target="_blank" rel="noopener noreferrer" hidden>
+                                Ver en Google Maps ↗
+                            </a>
+                        </div>
+
                     </div>
 
-                    <form id="formVisita">
-
-                        <!-- DESCRIPCIÓN -->
-                        <label for="descripcion">
-                            Descripción de la visita
-                        </label>
-
-                        <textarea
-                            id="descripcion"
-                            maxlength="300"
-                            required
-                            placeholder="Ej. Revisión de instalaciones y equipo..."></textarea>
-
-                        <div class="capture-grid">
-
-                            <!-- FOTOGRAFÍA -->
-                            <div class="capture">
-                                <div class="capture-symbol">📷</div>
-
-                                <h3>Fotografía</h3>
-                                <p>Captura una imagen desde tu dispositivo.</p>
-
-                                <button
-                                    class="btn btn-outline"
-                                    type="button"
-                                    id="btnFoto">
-                                    Tomar fotografía
-                                </button>
-
-                                <input
-                                    type="file"
-                                    id="inputFoto"
-                                    accept="image/*"
-                                    capture="environment"
-                                    hidden>
-
-                                <img
-                                    id="previewFoto"
-                                    alt="Vista previa de fotografía"
-                                    hidden>
-                            </div>
-
-                            <!-- UBICACIÓN -->
-                            <div class="capture">
-                                <div class="capture-symbol">📍</div>
-
-                                <h3>Ubicación</h3>
-                                <p>Obtén tus coordenadas actuales.</p>
-
-                                <button
-                                    class="btn btn-outline"
-                                    type="button"
-                                    id="btnUbicacion">
-                                    Obtener ubicación
-                                </button>
-
-                                <a
-                                    id="enlaceMapa"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    hidden>
-                                    Ver en Google Maps ↗
-                                </a>
-                            </div>
-
-                        </div>
-
-                        <!-- ESTADOS DE CAPTURA -->
-                        <div class="status">
-                            <span id="estadoFoto">
-                                Fotografía: pendiente
-                            </span>
-
-                            <span id="estadoUbicacion">
-                                Ubicación: pendiente
-                            </span>
-
-                            <span id="coordenadas">
-                                Latitud: — | Longitud: —
-                            </span>
-                        </div>
-
-                        <!-- MENSAJES -->
-                        <div
-                            id="mensaje"
-                            role="status"
-                            aria-live="polite">
-                        </div>
-
-                        <!-- GUARDAR -->
-                     <button type="submit" class="btn btn-primary btn-block">
-  Guardar visita <span>→</span>
-</button>
-
-                    </form>
-                </section>
-
-                <!-- SECCIÓN 2: MIS VISITAS -->
-                <section class="panel">
-
-                    <div class="panel-heading between">
-
-                        <div class="heading-group">
-                            <span class="step">02</span>
-
-                            <div>
-                                <h2>Mis visitas</h2>
-                                <p>Registros almacenados en este
-                                    dispositivo.</p>
-                            </div>
-                        </div>
-
-                        <span class="count" id="contador">
-                            0 registros
+                    <!-- ESTADOS DE CAPTURA -->
+                    <div class="status">
+                        <span id="estadoFoto">
+                            Fotografía: pendiente
                         </span>
 
+                        <span id="estadoUbicacion">
+                            Ubicación: pendiente
+                        </span>
+
+                        <span id="coordenadas">
+                            Latitud: — | Longitud: —
+                        </span>
                     </div>
 
-                    <!-- LISTADO DE VISITAS -->
-                    <div id="listaVisitas" class="visits">
+                    <!-- MENSAJES -->
+                    <div id="mensaje" role="status" aria-live="polite">
+                    </div>
 
-                        <div class="empty">
-                            <span>▤</span>
+                    <!-- GUARDAR -->
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Guardar visita <span>→</span>
+                    </button>
 
-                            <h3>Sin registros todavía</h3>
+                </form>
+            </section>
 
-                            <p>
-                                Las visitas que guardes aparecerán aquí.
-                            </p>
+            <!-- SECCIÓN 2: MIS VISITAS -->
+            <section class="panel">
+
+                <div class="panel-heading between">
+
+                    <div class="heading-group">
+                        <span class="step">02</span>
+
+                        <div>
+                            <h2>Mis visitas</h2>
+                            <p>Registros almacenados en este
+                                dispositivo.</p>
                         </div>
-
                     </div>
 
-                </section>
+                    <span class="count" id="contador">
+                        0 registros
+                    </span>
 
-            </div>
+                </div>
 
-            <!-- PIE DE PÁGINA -->
-            <footer>
-                Laboratorio de desarrollo web progresivo · Sin servidor ni
-                Firebase
-            </footer>
+                <!-- LISTADO DE VISITAS -->
+                <div id="listaVisitas" class="visits">
 
-        </main>
+                    <div class="empty">
+                        <span>▤</span>
 
-        <!-- SCRIPTS -->
-        <script src="./js/db.js"></script>
-        <script src="./js/app.js"></script>
+                        <h3>Sin registros todavía</h3>
 
-    </body>
+                        <p>
+                            Las visitas que guardes aparecerán aquí.
+                        </p>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+        <!-- PIE DE PÁGINA -->
+        <footer>
+            Laboratorio de desarrollo web progresivo · Sin servidor ni
+            Firebase
+        </footer>
+
+    </main>
+
+    <!-- SCRIPTS -->
+    <script src="./js/db.js"></script>
+    <script src="./js/app.js"></script>
+
+</body>
+
 </html>

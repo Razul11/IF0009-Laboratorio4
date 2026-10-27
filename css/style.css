@@ -365,3 +365,22 @@ footer {
         grid-template-columns: 1fr
     }
 }
+
+.card {
+    border: 3px solid #176B83; /* borde */
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px; /* espacio entre cards */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.card-body {
+    padding: 1rem;
+}

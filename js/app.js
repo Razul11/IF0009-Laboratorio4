@@ -1,8 +1,11 @@
 /* LABORATORIO PWA: complete las funciones TODO.
-   Se entregan interfaz, eventos, validaciones básicas y Service Worker.
-   No requiere Firebase ni backend. */
+  Se entregan interfaz, eventos, validaciones básicas y Service Worker.
+  No requiere Firebase ni backend. */
 let fotoActual = null;
 let ubicacionActual = null;
+
+let facingModeActual = "environment"; // "environment" (trasera) o "user" (frontal)
+
 const $ = (selector) => document.querySelector(selector);
 function mensaje(texto) {
   $("#mensaje").textContent = texto;
@@ -19,7 +22,7 @@ if ("serviceWorker" in navigator)
     navigator.serviceWorker.register("./sw.js").catch(console.error),
   );
 
-  
+
 
 $("#btnFoto").addEventListener("click", tomarFoto);
 $("#btnUbicacion").addEventListener("click", obtenerUbicacion);
@@ -46,15 +49,6 @@ $("#listaVisitas").addEventListener("click", async (e) => {
 
 
 // FUNCIONES POR DESARROLLAR
-
-
-// Variables de estado global
-//let fotoActual = null;
-//let ubicacionActual = null;
-
-// Helper para seleccionar elementos fácilmente
-//const $ = (selector) => document.querySelector(selector);
-
 // Helper para escapar HTML y prevenir XSS al renderizar texto del usuario
 function escaparHTML(cadena) {
   if (!cadena) return "";
@@ -72,34 +66,39 @@ let streamCamara = null;
 
 // 1. Activar la cámara del dispositivo y tomar la fotografía
 async function tomarFoto() {
-  // Verificar si la API getUserMedia está disponible
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    // Si no es compatible (ej. contexto no seguro / HTTP), hacemos fallback al input
     mensaje("getUserMedia no es compatible. Usando selector de archivo por defecto.");
     $("#inputFoto").click();
     return;
   }
 
   try {
-    // Solicitar acceso a la cámara trasera (environment)
+    // Solicitar la cámara según el facingMode actual
     streamCamara = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: "environment" } },
+      video: { facingMode: { exact: facingModeActual } }, // O ideal: facingModeActual
       audio: false
     });
 
-    // Crear dinámicamente un modal/contenedor flotante para mostrar la vista previa del video en vivo
     mostrarModalCamara(streamCamara);
   } catch (error) {
-    console.warn("No se pudo acceder a la cámara mediante getUserMedia:", error);
-    mensaje("No se pudo abrir la cámara directa. Abriendo selector de archivos.");
-    // Fallback al input file si el usuario deniega permisos o falla la cámara
-    $("#inputFoto").click();
+    console.warn("Error accediendo con exact facingMode, reintentando con ideal:", error);
+    try {
+      // Fallback si el dispositivo no soporta exact
+      streamCamara = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: facingModeActual },
+        audio: false
+      });
+      mostrarModalCamara(streamCamara);
+    } catch (errFallback) {
+      console.warn("No se pudo acceder a la cámara:", errFallback);
+      mensaje("No se pudo abrir la cámara directa. Abriendo selector de archivos.");
+      $("#inputFoto").click();
+    }
   }
 }
 
 // Función auxiliar para desplegar la vista previa de la cámara en vivo
 function mostrarModalCamara(stream) {
-  // Crear overlay si no existe
   let modal = document.getElementById("modalCamara");
   if (!modal) {
     modal = document.createElement("div");
@@ -115,8 +114,9 @@ function mostrarModalCamara(stream) {
   modal.innerHTML = `
     <div style="position: relative; max-width: 500px; width: 100%; text-align: center;">
       <video id="videoCamara" autoplay playsinline style="width: 100%; max-height: 60vh; border-radius: 8px; background: #000;"></video>
-      <div style="margin-top: 1rem; display: flex; gap: 10px; justify-content: center;">
+      <div style="margin-top: 1rem; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
         <button type="button" id="btnCapturarFotograma" class="btn btn-primary">Capturar Foto</button>
+        <button type="button" id="btnCambiarCamara" class="btn btn-outline" style="color: #fff; border-color: #fff;">🔄 Cambiar Cámara</button>
         <button type="button" id="btnCancelarCamara" class="btn btn-outline" style="color: #fff; border-color: #fff;">Cancelar</button>
       </div>
     </div>
@@ -125,7 +125,7 @@ function mostrarModalCamara(stream) {
   const video = modal.querySelector("#videoCamara");
   video.srcObject = stream;
 
-  // Botón para congelar y tomar la captura del video
+  // Botón para capturar imagen
   modal.querySelector("#btnCapturarFotograma").addEventListener("click", () => {
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth || 640;
@@ -134,16 +134,29 @@ function mostrarModalCamara(stream) {
     const contexto = canvas.getContext("2d");
     contexto.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Convertir el canvas a imagen Base64
     fotoActual = canvas.toDataURL("image/jpeg");
 
-    // Actualizar vista previa e interfaz
     const preview = $("#previewFoto");
     preview.src = fotoActual;
     preview.hidden = false;
     $("#estadoFoto").textContent = "Fotografía: capturada ✓";
 
     cerrarModalCamara();
+  });
+
+  // Botón para alternar la cámara (Trasera <-> Frontal)
+  modal.querySelector("#btnCambiarCamara").addEventListener("click", async () => {
+    // Detener el stream actual antes de cambiar
+    if (streamCamara) {
+      streamCamara.getTracks().forEach((track) => track.stop());
+      streamCamara = null;
+    }
+
+    // Alternar entre modo "environment" y "user"
+    facingModeActual = (facingModeActual === "environment") ? "user" : "environment";
+
+    // Reabrir la cámara con el nuevo modo
+    await tomarFoto();
   });
 
   // Botón para cancelar la captura
@@ -220,7 +233,7 @@ async function guardarVisita() {
 
   try {
     await guardarEnDB(nuevaVisita);
-    
+
     // Limpiar formulario y estado actual
     if ($("#formVisita")) $("#formVisita").reset();
     fotoActual = null;
@@ -266,7 +279,7 @@ async function cargarVisitas() {
       .map((visita) => {
         const fechaFormateada = new Date(visita.fecha).toLocaleString();
         const mapaUrl = `https://maps.google.com/?q=${visita.coordenadas.latitud},${visita.coordenadas.longitud}`;
-        
+
         return `
           <article class="card">
             ${visita.fotografia ? `<img src="${visita.fotografia}" alt="Fotografía de la visita" class="card-img">` : ''}
