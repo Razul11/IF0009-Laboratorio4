@@ -1,0 +1,24 @@
+{
+    "name": "Registro de visitas - Laboratorio PWA",
+    "short_name": "Visitas PWA",
+    "description": "Registro local de visitas con fotografía y geolocalización",
+    "start_url": "./index.html",
+    "scope": "./",
+    "display": "standalone",
+    "background_color": "#f3f7fa",
+    "theme_color": "#176b83",
+    "icons": [
+        {
+            "src": "./icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "./icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
